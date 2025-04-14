@@ -1,0 +1,14 @@
+services:
+  api:
+    container_name: api
+    build: ./API
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+
+  ui:
+    container_name: ui
+    build: ./UI
+    ports:
+      - "3000:80" # Map host port 3000 to container port 80
+    depends_on:
+      - api # Make UI wait for API to start
