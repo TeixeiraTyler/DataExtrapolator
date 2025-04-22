@@ -41,6 +41,18 @@ async def process_csv(
         # Convert binary plot data to base64 string
         if "correlation_plot" in result and result["correlation_plot"]:
             result["correlation_plot"] = base64.b64encode(result["correlation_plot"]).decode('utf-8')
+
+        if "distibution_plot" in result and result["distibution_plot"]:
+            result["distibution_plot"] = base64.b64encode(result["distibution_plot"]).decode('utf-8')
+
+        if "matrix_plot" in result and result["matrix_plot"]:
+            result["matrix_plot"] = base64.b64encode(result["matrix_plot"]).decode('utf-8')
+
+        if "importance_plot" in result and result["importance_plot"]:
+            result["importance_plot"] = base64.b64encode(result["importance_plot"]).decode('utf-8')
+        
+        if "residual_plot" in result and result["residual_plot"]:
+            result["residual_plot"] = base64.b64encode(result["residual_plot"]).decode('utf-8')
         
         return result
     except Exception as e:

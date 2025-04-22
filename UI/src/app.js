@@ -197,7 +197,39 @@ function App() {
                             <img 
                                 src={`data:image/png;base64,${results.correlation_plot}`}
                                 alt="Feature Correlations"
-                                className="correlation-plot"
+                                className="graph-plot"
+                            />
+                        </div>
+                        <div className="plot-section">
+                            <h3></h3>
+                            <img 
+                                src={`data:image/png;base64,${results.distibution_plot}`}
+                                alt="Residual Plot"
+                                className="graph-plot"
+                            />
+                        </div>
+                        <div className="plot-section">
+                            <h3></h3>
+                            <img 
+                                src={`data:image/png;base64,${results.matrix_plot}`}
+                                alt="Residual Plot"
+                                className="graph-plot"
+                            />
+                        </div>
+                        <div className="plot-section">
+                            <h3></h3>
+                            <img 
+                                src={`data:image/png;base64,${results.importance_plot}`}
+                                alt="Residual Plot"
+                                className="graph-plot"
+                            />
+                        </div>
+                        <div className="plot-section">
+                            <h3></h3>
+                            <img 
+                                src={`data:image/png;base64,${results.residual_plot}`}
+                                alt="Residual Plot"
+                                className="graph-plot"
                             />
                         </div>
                     </div>

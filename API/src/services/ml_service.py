@@ -11,6 +11,8 @@ from sklearn.preprocessing import StandardScaler
 from scipy import stats
 from typing import Dict, List, Tuple, Any, Optional
 
+from src.utils.graphs import GraphUtils
+
 from src.config import Settings
 
 
@@ -60,64 +62,6 @@ class MLService:
             "r2": float(r2)
         }
     
-    def plot_feature_correlations(self, df: pd.DataFrame, target_variable: str, selected_feature_names: List[str], figsize: Tuple[int, int] = (12, 8)) -> bytes:
-        """Create correlation plots between features and target variable
-        
-        Args:
-            df: Input DataFrame containing features and target
-            target_variable: Name of the target variable column
-            best_features: SelectKBest object containing the selected features
-            figsize: Tuple of figure dimensions (width, height)
-            
-        Returns:
-            Bytes object containing the plot image
-        """
-        # Calculate correlations with target variable
-        correlations = df.corr()[target_variable]
-        
-        # Filter correlations to only include selected features
-        correlations = correlations[correlations.index.isin(selected_feature_names)]
-        
-        # Use absolute correlation values
-        correlations = correlations.abs()
-        
-        # Sort by absolute correlation values (descending)
-        correlations = correlations.sort_values(ascending=False)
-        
-        # Create the plot
-        plt.figure(figsize=figsize)
-        
-        # Create bar plot
-        bars = plt.bar(range(len(correlations)), correlations.values)
-        
-        # Customize the plot
-        plt.title(f'Absolute Feature Correlations with {target_variable}', pad=20)
-        plt.xlabel('Features')
-        plt.ylabel('Absolute Correlation Coefficient')
-        plt.xticks(range(len(correlations)), correlations.index, rotation=45, ha='right')
-        
-        # Add correlation values on top of bars
-        for bar in bars:
-            height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{height:.2f}',
-                    ha='center', va='bottom')
-        
-        # Add horizontal line at y=0
-        plt.axhline(y=0, color='r', linestyle='-', alpha=0.3)
-        
-        # Adjust layout to prevent label cutoff
-        plt.tight_layout()
-        
-        # Save plot to bytes buffer
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        # Reset buffer position
-        buf.seek(0)
-        return buf.getvalue() 
-    
     def process_csv(self, csv_content: bytes, dependent_variable: str, num_features: int = 10) -> Dict[str, Any]:
         """Process CSV data and train models
         
@@ -148,6 +92,11 @@ class MLService:
         
         # Convert categorical variables to dummy/indicator variables
         df = pd.get_dummies(df)
+        
+        # Convert boolean columns to uint8 to avoid numpy warnings
+        bool_cols = df.select_dtypes(include=['bool']).columns
+        if len(bool_cols) > 0:
+            df[bool_cols] = df[bool_cols].astype('uint8')
         
         # Check if dependent variable exists in dataframe
         if dependent_variable not in df.columns:
@@ -219,7 +168,11 @@ class MLService:
         # Evaluate final model performance
         final_metrics = self.evaluate_model(y_test, y_pred)
         
-        correlation_plot = self.plot_feature_correlations(df, dependent_variable, selected_feature_names)
+        correlation_plot = GraphUtils.plot_feature_correlations(df, dependent_variable, selected_feature_names)
+        distibution_plot = GraphUtils.plot_feature_distributions(df, selected_feature_names)
+        matrix_plot = GraphUtils.plot_scatter_matrix(df, selected_feature_names)
+        importance_plot = GraphUtils.plot_feature_importance(final_model, selected_feature_names)
+        residual_plot = GraphUtils.plot_residuals(y_test, y_pred)
         
         return {
             "dropped_columns": list(columns_to_drop),
@@ -228,5 +181,9 @@ class MLService:
             "best_parameters": grid_search.best_params_,
             "best_cross_validation_score": float(grid_search.best_score_),
             "final_metrics": final_metrics,
-            "correlation_plot": correlation_plot
+            "correlation_plot": correlation_plot,
+            "distibution_plot": distibution_plot,
+            "matrix_plot": matrix_plot,
+            "importance_plot": importance_plot,
+            "residual_plot": residual_plot
         }
